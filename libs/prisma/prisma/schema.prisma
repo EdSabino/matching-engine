@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["extendedIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id           Int       @id @default(autoincrement())
+  market       String
+  side         OrderSide
+  orderType    OrderType
+  volume       Int       @default(0)
+  price        Int       @default(0)
+  locked       Int?      @default(0)
+  status       Status    @default(OPENED)
+  tradedVolume Int       @default(0)
+  tradesCount  Int       @default(0)
+  tenantId     Int
+  externalId   Int?
+  createdAt    DateTime  @default(now())
+  makerTrades  Trade[]   @relation(name: "maker_relation")
+  takerTrades  Trade[]   @relation(name: "taker_relation")
+  tenant       Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@index([externalId, tenantId])
+}
+
+model Trade {
+  id        Int      @id @default(autoincrement())
+  market    String
+  price     Int      @default(0)
+  volume    Int      @default(0)
+  funds     Int      @default(0)
+  makerId   Int
+  takerId   Int
+  tenantId  Int
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  maker     Order    @relation(fields: [makerId], references: [id], name: "maker_relation")
+  taker     Order    @relation(fields: [takerId], references: [id], name: "taker_relation")
+}
+
+model Tenant {
+  id               Int     @id @default(autoincrement())
+  availableMarkets String
+  accessUuid       String  @default(uuid())
+  trades           Trade[] @relation()
+  orders           Order[] @relation()
+}
+
+enum OrderType {
+  LIMIT
+  MARKET
+}
+
+enum OrderSide {
+  BID
+  ASK
+}
+
+enum Status {
+  OPENED
+  FILLED
+  CANCELED
+}
