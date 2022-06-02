@@ -23,6 +23,7 @@
   "dependencies": {
     "@golevelup/nestjs-rabbitmq": "^2.3.0",
     "@matching-engine/prisma": "workspace:*",
+    "@nestjs/axios": "^0.0.8",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^2.0.1",
     "@nestjs/core": "^8.0.0",

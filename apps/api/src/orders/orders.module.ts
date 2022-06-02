@@ -7,6 +7,7 @@ import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { PostTradeService } from './post-trade.service';
 import { UpdateBookService } from './update-book.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { UpdateBookService } from './update-book.service';
       ],
       uri: 'amqp://@localhost:5672'
     }),
+    HttpModule,
     OrdersModule
   ],
   controllers: [OrdersController],
