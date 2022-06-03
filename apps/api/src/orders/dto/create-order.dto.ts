@@ -1,8 +1,8 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, IntersectionType, OmitType, PickType } from "@nestjs/swagger";
 import { OrderSide, OrderType } from "@matching-engine/prisma";
 import { IsNotEmpty } from "class-validator";
 
-export class CreateOrderDto {
+export class CreateLimitOrder {
   @ApiProperty({
     description: 'The market pair of the order',
     required: true
@@ -39,3 +39,7 @@ export class CreateOrderDto {
   })
   price: number;
 }
+
+export class CreateMarketOrder extends OmitType(CreateLimitOrder, ['price']) {}
+
+export class CreateOrderDto extends IntersectionType(CreateLimitOrder, CreateMarketOrder) {}
