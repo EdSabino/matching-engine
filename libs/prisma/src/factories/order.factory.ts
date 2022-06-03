@@ -9,9 +9,10 @@ export const buildOrder = Factory.Sync.makeFactory<Order>({
   volume: 10,
   price: 100,
   locked: 10,
-  status: Status.OPENED,
   tradedVolume: 0,
+  status: Status.OPENED,
   tradesCount: 0,
   tenantId: Factory.each((i) => i),
-  externalId: 1
+  externalId: 1,
+  createdAt: new Date()
 });

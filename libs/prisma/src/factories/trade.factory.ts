@@ -10,4 +10,5 @@ export const buildTrade = Factory.Sync.makeFactory<Trade>({
   makerId: 1,
   takerId: 2,
   tenantId: Factory.each((i) => i),
+  createdAt: new Date()
 });

@@ -16,11 +16,11 @@ model Order {
   market       String
   side         OrderSide
   orderType    OrderType
-  volume       Int       @default(0)
-  price        Int       @default(0)
-  locked       Int?      @default(0)
+  volume       Float     @default(0)
+  price        Float     @default(0)
+  locked       Float?    @default(0)
   status       Status    @default(OPENED)
-  tradedVolume Int       @default(0)
+  tradedVolume Float     @default(0)
   tradesCount  Int       @default(0)
   tenantId     Int
   externalId   Int?
@@ -35,9 +35,9 @@ model Order {
 model Trade {
   id        Int      @id @default(autoincrement())
   market    String
-  price     Int      @default(0)
-  volume    Int      @default(0)
-  funds     Int      @default(0)
+  price     Float    @default(0)
+  volume    Float    @default(0)
+  funds     Float    @default(0)
   makerId   Int
   takerId   Int
   tenantId  Int
