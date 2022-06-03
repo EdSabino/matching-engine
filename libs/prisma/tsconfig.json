@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "baseUrl": "./src",
-    "rootDir": "./"
+    "rootDir": "./src"
   },
-  "exclude": ["./dist"]
+  "exclude": ["./dist", "./prisma"]
 }
