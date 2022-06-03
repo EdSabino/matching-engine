@@ -1,12 +1,14 @@
-import { Order, OrderType, Prisma } from '@matching-engine/prisma';
+import { Order, OrderType, Prisma, WebhookAction } from '@matching-engine/prisma';
 import { PrismaService } from 'src/prisma.service';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class PostTradeService {
   constructor(
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    private httpService: HttpService
   ) {}
 
   @RabbitSubscribe({
@@ -39,6 +41,17 @@ export class PostTradeService {
         })
       ]);
     }));
+
+    const webhook = await this.prisma.webhook.findFirst({
+      where: {
+        tenantId: order.tenantId,
+        action: WebhookAction.NEWTRADES
+      }
+    });
+
+    if (webhook) {
+      this.httpService.post(webhook.fullAddress, msg);
+    }
   }
 
   private getOrderArgs(order: Order) {

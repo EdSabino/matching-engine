@@ -48,11 +48,27 @@ model Trade {
 }
 
 model Tenant {
-  id               Int     @id @default(autoincrement())
+  id               Int       @id @default(autoincrement())
   availableMarkets String
-  accessUuid       String  @default(uuid())
-  trades           Trade[] @relation()
-  orders           Order[] @relation()
+  accessUuid       String    @default(uuid())
+  trades           Trade[]   @relation()
+  orders           Order[]   @relation()
+  webhooks         Webhook[] @relation()
+}
+
+model Webhook {
+  id          Int           @id @default(autoincrement())
+  fullAddress String
+  tenantId    Int
+  action      WebhookAction
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, action])
+}
+
+enum WebhookAction {
+  BOOKUPDATE
+  NEWTRADES
 }
 
 enum OrderType {

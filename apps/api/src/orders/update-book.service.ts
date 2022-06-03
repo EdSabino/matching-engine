@@ -1,6 +1,9 @@
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { WebhookAction } from '@matching-engine/prisma/dist';
+import { HttpService } from '@nestjs/axios';
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
+import { PrismaService } from 'src/prisma.service';
 
 interface PriceLevel {
   price: number;
@@ -16,7 +19,11 @@ interface BookUpdateExchangeMessage {
 
 @Injectable()
 export class UpdateBookService {
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private httpService: HttpService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
+  ) {}
 
   @RabbitSubscribe({
     exchange: 'bookUpdateExchange',
@@ -25,8 +32,24 @@ export class UpdateBookService {
   })
   public async call(msg: BookUpdateExchangeMessage): Promise<void> {
     const client = this.getClient();
-    await client.set(`book.${msg.tenantId}.${msg.market}.bid`, JSON.stringify(this.processLevels(msg.bid)));
-    await client.set(`book.${msg.tenantId}.${msg.market}.ask`, JSON.stringify(this.processLevels(msg.ask)));
+    const bid = this.processLevels(msg.bid);
+    const ask = this.processLevels(msg.ask);
+    await client.set(`book.${msg.tenantId}.${msg.market}.bid`, JSON.stringify(bid));
+    await client.set(`book.${msg.tenantId}.${msg.market}.ask`, JSON.stringify(ask));
+
+    const webhook = await this.prisma.webhook.findFirst({
+      where: {
+        tenantId: msg.tenantId,
+        action: WebhookAction.NEWTRADES
+      }
+    });
+
+    if (webhook) {
+      this.httpService.post(webhook.fullAddress, {
+        bid,
+        ask
+      });
+    }
   }
 
   private processLevels(levels: PriceLevel[]): any[] {
