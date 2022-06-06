@@ -3,7 +3,6 @@ import { Exchange } from "amqp-ts";
 import { Engine } from "./engine/engine";
 import { EngineNotFound } from "./engine/errors/engine-not-found.error";
 import * as Amqp from 'amqp-ts';
-import { Console } from "console";
 
 export class Matching {
   constructor(
@@ -15,26 +14,46 @@ export class Matching {
 
   public dryRun: boolean = false;
 
-  public async call(message: Record<any, any>): Promise<void> {
-    const engine = this.engines[message.order.market];
+  public async submit(message: Record<any, any>): Promise<void> {
+    const engine = this.getEngine(message.order.market);
+
+    const result = await engine.submit(message.order as Order);
+
+    if (!this.dryRun) {
+      this.postTradeExchange.send(new Amqp.Message(JSON.stringify(result)), `post.trade.key.${result.trades.length > 0}`)
+    }
+
+    this.propagateBook(engine, message.order.market);
+  }
+
+  public async cancel(message: Record<any, any>): Promise<void> {
+    const engine = this.getEngine(message.order.market);
+
+    const result = await engine.cancel(message.order as Order);
+
+    if (!this.dryRun) {
+      this.postTradeExchange.send(new Amqp.Message(JSON.stringify(result)), `post.trade.key.${result.trades.length > 0}`)
+    }
+
+    this.propagateBook(engine, message.order.market);
+  }
+
+  private getEngine(market: string): Engine {
+    const engine = this.engines[market];
 
     if (!engine) {
       throw new EngineNotFound('Engine not found.');
     }
 
-    const result = await engine.submit(message.order as Order);
-    console.log(JSON.stringify(result))
-    if (!this.dryRun) {
-      this.postTradeExchange.send(new Amqp.Message(JSON.stringify(result)), `post.trade.key.${result.trades.length > 0}`)
-    }
+    return engine;
+  }
 
+  private propagateBook(engine: Engine, market: string) {
     this.bookUpdateExchange.send(new Amqp.Message(JSON.stringify({
       bid: engine.orderbooks[OrderSide.BID].getLimitBook(),
       ask: engine.orderbooks[OrderSide.ASK].getLimitBook(),
       tenantId: this.tenantId,
-      market: message.order.market
-    })), `book.update.key.${message.order.market}.${this.tenantId}`)
+      market: market
+    })), `book.update.key.${market}.${this.tenantId}`)
   }
-
-
 }

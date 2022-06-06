@@ -104,4 +104,5 @@ enum Status {
   OPENED
   FILLED
   CANCELED
+  PARTIALLY_FILLED
 }

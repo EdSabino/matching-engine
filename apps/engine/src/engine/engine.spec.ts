@@ -1,12 +1,43 @@
-import { Order, OrderSide, Trade, buildOrder } from "@matching-engine/prisma";
+import { Order, OrderSide, Trade, buildOrder, Status } from "@matching-engine/prisma";
 import { Engine } from "./engine";
 
+jest
+  .useFakeTimers()
+  .setSystemTime(new Date('2022-06-06T13:40:02.192Z'));
+  
 describe('Engine', () => {
   let engine: Engine;
   let order: Order;
 
   beforeEach(() => {
     engine = Engine.create();
+  });
+
+  describe('#cancel', () => {
+    let result: {
+      order: Order,
+      trades: {
+        counterOrder: Order,
+        trade: Partial<Trade>
+      }[]
+    };
+
+    describe('with order with no match', () => {
+      beforeEach(async () => {
+        order = buildOrder.build();
+        await engine.submit(order);
+
+        result = await engine.cancel(order);
+      });
+
+      it('cancels order', () => {
+        expect(result.order.status).toEqual(Status.CANCELED);
+      });
+
+      it('remove order from book', () => {
+        expect(engine.orderbooks[OrderSide.ASK].top()).toBeUndefined();
+      });
+    });
   });
 
   describe('#submit', () => {
@@ -54,6 +85,7 @@ describe('Engine', () => {
           order,
           trades: [{
             trade: {
+              createdAt: new Date('2022-06-06T13:40:02.192Z'),
               price: 100,
               volume: 10,
               funds: 1000,

@@ -26,8 +26,9 @@ async function bootstrap() {
       console.log('ready for new orders')
       queue.activateConsumer((message) => {
         console.log('Message received: ' + message.getContent());
+        const messageParsed = JSON.parse(message.getContent());
         try {
-          matchings[tenant.id].call(JSON.parse(message.getContent()));
+          matchings[tenant.id][messageParsed.action].call(matchings[tenant.id], messageParsed);
         } catch (e) {
           console.log(e)
         }

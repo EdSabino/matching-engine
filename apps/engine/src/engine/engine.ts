@@ -3,6 +3,7 @@ import { TradeService } from './services/trade.service';
 import createRBTree = require('functional-red-black-tree');
 import { EmptyBookError } from './errors/empty-book.error';
 import { Order, OrderSide, OrderType, Status, Trade } from '@matching-engine/prisma';
+import { Stats } from 'fs';
 
 export class Engine {
   constructor(public readonly orderbooks: Record<OrderSide, Orderbook>, private readonly tradeService: TradeService) {}
@@ -12,6 +13,25 @@ export class Engine {
       [OrderSide.ASK]: new Orderbook(OrderSide.ASK, createRBTree(), createRBTree()),
       [OrderSide.BID]: new Orderbook(OrderSide.BID, createRBTree(), createRBTree()),
     }, new TradeService());
+  }
+
+  public async cancel(order: Order): Promise<{
+    order: Order,
+    trades: {
+      counterOrder: Order,
+      trade: Partial<Trade>
+    }[]
+  }> {
+    const orderbook = this.orderbooks[order.side];
+
+    order.status = order.tradedVolume > 0 ? Status.PARTIALLY_FILLED : Status.CANCELED;
+
+    orderbook.remove(order);
+
+    return {
+      order,
+      trades: []
+    };
   }
 
   public async submit(order: Order): Promise<{

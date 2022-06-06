@@ -3,6 +3,10 @@ import { Orderbook } from "../entities/orderbook";
 import { TradeService } from "./trade.service";
 import createRBTree = require('functional-red-black-tree');
 
+jest
+  .useFakeTimers()
+  .setSystemTime(new Date('2022-06-06T13:40:02.192Z'));
+
 describe('TradeService', () => {
   const tradeService: TradeService = new TradeService();
   let orderbook: Orderbook;
@@ -29,6 +33,7 @@ describe('TradeService', () => {
 
       it('returns expected trade', () => {
         expect(tradeService.trade(order, counterOrder, orderbook)).toEqual({
+          createdAt: new Date('2022-06-06T13:40:02.192Z'),
           price: 100,
           volume: 10,
           funds: 1000,
@@ -52,6 +57,7 @@ describe('TradeService', () => {
 
       it('returns expected trade', () => {
         expect(tradeService.trade(order, counterOrder, orderbook)).toEqual({
+          createdAt: new Date('2022-06-06T13:40:02.192Z'),
           price: 100,
           volume: 10,
           funds: 1000,
@@ -76,6 +82,7 @@ describe('TradeService', () => {
 
       it('returns expected trade', () => {
         expect(tradeService.trade(order, counterOrder, orderbook)).toEqual({
+          createdAt: new Date('2022-06-06T13:40:02.192Z'),
           price: 100,
           volume: 10,
           funds: 1000,
@@ -105,6 +112,7 @@ describe('TradeService', () => {
 
       it('returns expected trade', () => {
         expect(tradeService.trade(order, counterOrder, orderbook)).toEqual({
+          createdAt: new Date('2022-06-06T13:40:02.192Z'),
           price: 104,
           volume: 0.09615384615384616,
           funds: 10,
