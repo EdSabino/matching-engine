@@ -54,6 +54,7 @@ model Tenant {
   trades           Trade[]   @relation()
   orders           Order[]   @relation()
   webhooks         Webhook[] @relation()
+  klines           KLine[]   @relation()
 }
 
 model Webhook {
@@ -64,6 +65,24 @@ model Webhook {
   tenant      Tenant        @relation(fields: [tenantId], references: [id])
 
   @@unique([tenantId, action])
+}
+
+model KLine {
+  id               Int      @id @default(autoincrement())
+  tenantId         Int
+  market           String
+  openTime         DateTime
+  openValue        Float
+  highestValue     Float
+  lowestValue      Float
+  closeValue       Float
+  closeTime        DateTime
+  numberTrades     Int
+  tradedVolume     Float
+  lastTradedSecond Int
+  tenant           Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, market, lastTradedSecond])
 }
 
 enum WebhookAction {

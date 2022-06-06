@@ -55,6 +55,8 @@ export class Engine {
       }
     }
 
+    this.calculateMarketPrice(order, trades);
+
     if (!this.isFilled(order)) {
       const book = this.orderbooks[order.side];
       book.add(order);
@@ -66,6 +68,12 @@ export class Engine {
       order,
       trades
     };
+  }
+
+  private calculateMarketPrice(order: Order, trades: Partial<Trade>[]) {
+    if (order.orderType === OrderType.MARKET) {
+      order.price = trades.reduce((previous: number, trade: Partial<Trade>) => trade.price + previous, 0) / trades.length;
+    }
   }
 
   private getCounterBook(side: OrderSide): Orderbook {
@@ -86,16 +94,13 @@ export class Engine {
   }
 
   private isFilled(order: Order): boolean {
-    return order.tradedVolume >= order.volume;
+    return order.volume <= 0;
   }
 
   private fillOrder(order: Order, trade: Partial<Trade>) {
     order.tradesCount++;
     order.volume -= trade.volume;
     order.tradedVolume += trade.volume;
-    if (order.orderType === OrderType.MARKET) {
-      order.price = (order.price + trade.price) / order.tradesCount;
-    }
   }
 
   private fillTop(book: Orderbook, trade: Partial<Trade>) {

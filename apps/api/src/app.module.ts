@@ -1,6 +1,7 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { OrdersModule } from './orders/orders.module';
@@ -21,7 +22,8 @@ import { TradesModule } from './trades/trades.module';
     }),
     OrdersModule,
     TenantsModule,
-    TradesModule
+    TradesModule,
+    AnalyticsModule
   ],
   controllers: [AppController],
   providers: [AppService],

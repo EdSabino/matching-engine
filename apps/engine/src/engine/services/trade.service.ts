@@ -41,7 +41,8 @@ abstract class TradeWith {
       funds,
       market,
       makerId,
-      takerId
+      takerId,
+      createdAt: new Date()
     }
   }
 

@@ -8,6 +8,7 @@ import { OrdersService } from './orders.service';
 import { PostTradeService } from './post-trade.service';
 import { UpdateBookService } from './update-book.service';
 import { HttpModule } from '@nestjs/axios';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -36,4 +37,3 @@ import { HttpModule } from '@nestjs/axios';
   providers: [PrismaService, OrdersService, PostTradeService, UpdateBookService],
 })
 export class OrdersModule {}
-

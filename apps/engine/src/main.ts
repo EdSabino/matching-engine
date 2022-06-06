@@ -23,7 +23,7 @@ async function bootstrap() {
       queue.bind(exchange, `matching.key.${market}.${tenant.id}`);
 
       dryRun(prisma, tenant.id, market);
-
+      console.log('ready for new orders')
       queue.activateConsumer((message) => {
         console.log('Message received: ' + message.getContent());
         try {

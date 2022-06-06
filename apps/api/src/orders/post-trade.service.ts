@@ -13,7 +13,7 @@ export class PostTradeService {
 
   @RabbitSubscribe({
     exchange: 'postTradeExchange',
-    routingKey: 'post.trade.key.*.*',
+    routingKey: 'post.trade.key.*',
     queue: 'post.trade.queue',
   })
   public async call(msg: Record<string, any>): Promise<void> {

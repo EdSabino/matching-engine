@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "KLine" ADD COLUMN     "id" SERIAL NOT NULL,
+ADD CONSTRAINT "KLine_pkey" PRIMARY KEY ("id");

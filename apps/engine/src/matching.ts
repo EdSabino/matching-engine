@@ -3,6 +3,7 @@ import { Exchange } from "amqp-ts";
 import { Engine } from "./engine/engine";
 import { EngineNotFound } from "./engine/errors/engine-not-found.error";
 import * as Amqp from 'amqp-ts';
+import { Console } from "console";
 
 export class Matching {
   constructor(
@@ -22,9 +23,9 @@ export class Matching {
     }
 
     const result = await engine.submit(message.order as Order);
-
+    console.log(JSON.stringify(result))
     if (!this.dryRun) {
-      this.postTradeExchange.send(new Amqp.Message(JSON.stringify(result)), `post.trade.key.${message.order.market}.${this.tenantId}`)
+      this.postTradeExchange.send(new Amqp.Message(JSON.stringify(result)), `post.trade.key.${result.trades.length > 0}`)
     }
 
     this.bookUpdateExchange.send(new Amqp.Message(JSON.stringify({
