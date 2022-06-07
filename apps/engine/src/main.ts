@@ -16,6 +16,8 @@ route.get('/', (req: Request, res: Response) => {
   res.json({ message: 'Hello world!' });
 });
 
+app.use(route);
+
 const matchings = {};
 
 async function bootstrap() {
@@ -83,4 +85,4 @@ async function dryRun(prisma: PrismaClient, tenantId: number, market: string) {
 }
 
 bootstrap();
-app.listen(process.env.PORT, () => 'server running on port 3333');
+app.listen(3000, () => console.log('server running on port 3000'));
