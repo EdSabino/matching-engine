@@ -10,11 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    CacheModule.register<RedisClientOptions>({
-      store: redisStore,
-      url: 'redis://localhost:5555',
-      database: 1
-    }),
+    CacheModule.register(),
     RabbitMQModule.forRootAsync(RabbitMQModule, {
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
