@@ -31,7 +31,7 @@
               }
             },
             "AMQP_URL": {
-              "fromParameterStore": "AMQP_URL"
+              "fromParameterStore": "fc.matching-engine.env.crypto-matching-engine.18gp1nkh.AMQP_URL"
             }
           }
         },
@@ -59,7 +59,7 @@
           "startCommand": "cd apps/engine && pnpm start",
           "envVariables": {
             "AMQP_URL": {
-              "fromParameterStore": "AMQP_URL"
+              "fromParameterStore": "fc.matching-engine.env.crypto-matching-engine.18gp1nkh.AMQP_URL"
             }
           }
         }
