@@ -26,7 +26,7 @@
             "PORT": "3000",
             "DATABASE_URL": {
               "fromService": {
-                "id": "me-prod-db",
+                "id": "db-prod",
                 "value": "dbConnectionString"
               }
             },
@@ -64,7 +64,7 @@
             },
             "DATABASE_URL": {
               "fromService": {
-                "id": "me-prod-db",
+                "id": "db-prod",
                 "value": "dbConnectionString"
               }
             }
