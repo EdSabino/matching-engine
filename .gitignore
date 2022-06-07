@@ -4,3 +4,5 @@ dist/**
 .next/**
 node_modules
 ./*/.turbo
+tsconfig.tsbuildinfo
+./*/*/tsconfig.tsbuildinfo

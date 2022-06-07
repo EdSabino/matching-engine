@@ -6,6 +6,7 @@ import * as redisStore from 'cache-manager-redis-store';
 import { PrismaService } from 'src/prisma.service';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -14,14 +15,18 @@ import { AnalyticsService } from './analytics.service';
       url: 'redis://localhost:5555',
       database: 1
     }),
-    RabbitMQModule.forRoot(RabbitMQModule, {
-      exchanges: [
-        {
-          name: 'postTradeExchange',
-          type: 'topic',
-        },
-      ],
-      uri: 'amqp://@localhost:5672'
+    RabbitMQModule.forRootAsync(RabbitMQModule, {
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        exchanges: [
+          {
+            name: 'postTradeExchange',
+            type: 'topic',
+          },
+        ],
+        uri: configService.get('AMQP_URL')
+      }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [AnalyticsController],

@@ -3,7 +3,6 @@ import { TradeService } from './services/trade.service';
 import createRBTree = require('functional-red-black-tree');
 import { EmptyBookError } from './errors/empty-book.error';
 import { Order, OrderSide, OrderType, Status, Trade } from '@matching-engine/prisma';
-import { Stats } from 'fs';
 
 export class Engine {
   constructor(public readonly orderbooks: Record<OrderSide, Orderbook>, private readonly tradeService: TradeService) {}

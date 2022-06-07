@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { PrismaClient, Status, Tenant } from '@matching-engine/prisma';
 import * as Amqp from 'amqp-ts';
 import { Engine } from './engine/engine';
@@ -8,7 +9,7 @@ const matchings = {};
 async function bootstrap() {
   const prisma = new PrismaClient();
   const tenants = await prisma.tenant.findMany();
-  const connection = new Amqp.Connection('amqp://localhost:5672');
+  const connection = new Amqp.Connection(process.env.AMQP_URL);
   const exchange = connection.declareExchange('newOrdersExchange');
   const postTradeExchange = connection.declareExchange('postTradeExchange', 'topic');
   const bookUpdateExchange = connection.declareExchange('bookUpdateExchange', 'topic');
@@ -60,7 +61,7 @@ async function dryRun(prisma: PrismaClient, tenantId: number, market: string) {
 
   for (let order of orders) {
     order.volume = order.volume - order.tradedVolume;
-    await matchings[tenantId].call({
+    await matchings[tenantId].submit({
       action: 'submit',
       order
     });

@@ -1,6 +1,6 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -11,14 +11,18 @@ import { TradesModule } from './trades/trades.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    RabbitMQModule.forRoot(RabbitMQModule, {
-      exchanges: [
-        {
-          name: 'newOrdersExchange',
-          type: 'direct',
-        },
-      ],
-      uri: 'amqp://@localhost:5672'
+    RabbitMQModule.forRootAsync(RabbitMQModule, {
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        exchanges: [
+          {
+            name: 'newOrdersExchange',
+            type: 'direct',
+          },
+        ],
+        uri: configService.get('AMQP_URL')
+      }),
+      inject: [ConfigService],
     }),
     OrdersModule,
     TenantsModule,

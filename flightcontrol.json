@@ -1,0 +1,69 @@
+{
+  "environments": [
+    {
+      "id": "crypto-matching-engine",
+      "name": "Crypto MatchingEngine Prod",
+      "region": "us-west-2",
+      "source": {
+        "branch": "main"
+      },
+      "services": [
+        {
+          "id": "api-prod",
+          "name": "ME API",
+          "type": "fargate",
+          "cpu": 0.5,
+          "memory": 0.5,
+          "minInstances": 1,
+          "maxInstances": 1,
+          "installCommand": "pnpm install --prod false",
+          "buildCommand": "pnpm run build --filter=api",
+          "postBuildCommand": "pnpm run migrate:deploy",
+          "startCommand": "cd apps/api && pnpm start",
+          "domain": "api.anthill-engine.com",
+          "dependsOn": ["engine-prod"],
+          "envVariables": {
+            "PORT": "3000",
+            "DATABASE_URL": {
+              "fromService": {
+                "id": "me-prod-db",
+                "value": "dbConnectionString"
+              }
+            },
+            "AMQP_URL": {
+              "fromParameterStore": "AMQP_URL"
+            }
+          }
+        },
+        {
+          "id": "db-prod",
+          "name": "ME Database",
+          "type": "rds",
+          "engine": "postgres",
+          "engineVersion": "12",
+          "instanceSize": "db.t2.micro",
+          "storage": 20,
+          "private": false
+        },
+        {
+          "id": "engine-prod",
+          "name": "ME Engine Prod",
+          "type": "fargate",
+          "cpu": 0.25,
+          "memory": 0.5,
+          "minInstances": 1,
+          "maxInstances": 1,
+          "installCommand": "pnpm install --prod false",
+          "buildCommand": "pnpm run build --filter=api",
+          "postBuildCommand": "echo a",
+          "startCommand": "cd apps/engine && pnpm start",
+          "envVariables": {
+            "AMQP_URL": {
+              "fromParameterStore": "AMQP_URL"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

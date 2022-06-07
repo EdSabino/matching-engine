@@ -9,6 +9,7 @@ import { PostTradeService } from './post-trade.service';
 import { UpdateBookService } from './update-book.service';
 import { HttpModule } from '@nestjs/axios';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -17,18 +18,22 @@ import { ScheduleModule } from '@nestjs/schedule';
       url: 'redis://localhost:5555',
       database: 1
     }),
-    RabbitMQModule.forRoot(RabbitMQModule, {
-      exchanges: [
-        {
-          name: 'newOrdersExchange',
-          type: 'direct',
-        },
-        {
-          name: 'postTradeExchange',
-          type: 'topic',
-        },
-      ],
-      uri: 'amqp://@localhost:5672'
+    RabbitMQModule.forRootAsync(RabbitMQModule, {
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        exchanges: [
+          {
+            name: 'newOrdersExchange',
+            type: 'direct',
+          },
+          {
+            name: 'postTradeExchange',
+            type: 'topic',
+          },
+        ],
+        uri: configService.get('AMQP_URL')
+      }),
+      inject: [ConfigService],
     }),
     HttpModule,
     OrdersModule
