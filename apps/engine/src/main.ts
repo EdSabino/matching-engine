@@ -1,10 +1,9 @@
-console.log(process.env)
 import 'dotenv/config';
 import { PrismaClient, Status, Tenant } from '@matching-engine/prisma';
 import * as Amqp from 'amqp-ts';
 import { Engine } from './engine/engine';
 import { Matching } from './matching';
-import express from 'express';
+import * as express from 'express';
 import { Router, Request, Response } from 'express';
 
 const app = express();

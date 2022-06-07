@@ -1,4 +1,4 @@
-import { KLine, Tenant } from '@matching-engine/prisma/dist';
+import { KLine, Tenant } from '@matching-engine/prisma';
 import { Controller, Get, Query, Session, UseInterceptors } from '@nestjs/common';
 import { TenantAuthInterceptor } from 'src/tenants/tenants-auth.interceptor';
 import { AnalyticsService } from './analytics.service';

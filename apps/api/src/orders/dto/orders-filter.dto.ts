@@ -1,4 +1,4 @@
-import { OrderSide, OrderType, Status } from "@matching-engine/prisma/dist";
+import { OrderSide, OrderType, Status } from "@matching-engine/prisma";
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from 'class-transformer';
 import { IsOptional } from "class-validator";

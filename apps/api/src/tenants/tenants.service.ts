@@ -1,4 +1,4 @@
-import { Prisma, Tenant, Webhook } from "@matching-engine/prisma/dist";
+import { Prisma, Tenant, Webhook } from "@matching-engine/prisma";
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma.service";
 

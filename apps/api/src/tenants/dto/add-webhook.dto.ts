@@ -1,4 +1,4 @@
-import { WebhookAction } from "@matching-engine/prisma/dist";
+import { WebhookAction } from "@matching-engine/prisma";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class AddWebhookDto {

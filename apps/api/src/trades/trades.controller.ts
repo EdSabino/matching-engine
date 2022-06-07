@@ -1,4 +1,4 @@
-import { Tenant, Trade } from '@matching-engine/prisma/dist';
+import { Tenant, Trade } from '@matching-engine/prisma';
 import { Controller, Get, Query, Session } from '@nestjs/common';
 import { TradesFilter } from './dto/trades-filter.dto';
 import { TradesService } from './trades.service';

@@ -1,5 +1,5 @@
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { KLine, Trade } from '@matching-engine/prisma/dist';
+import { KLine, Trade } from '@matching-engine/prisma';
 import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { PrismaService } from 'src/prisma.service';
