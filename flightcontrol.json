@@ -53,7 +53,7 @@
           "memory": 0.5,
           "minInstances": 1,
           "maxInstances": 1,
-          "installCommand": "pnpm install --prod false",
+          "installCommand": "pnpm install --prod false --unsafe-perm",
           "buildCommand": "pnpm run build --filter=engine",
           "postBuildCommand": "echo a",
           "startCommand": "cd apps/engine && pnpm start",
