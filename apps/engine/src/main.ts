@@ -1,3 +1,4 @@
+console.log(process.env)
 import 'dotenv/config';
 import { PrismaClient, Status, Tenant } from '@matching-engine/prisma';
 import * as Amqp from 'amqp-ts';
