@@ -16,7 +16,7 @@
           "memory": 0.5,
           "minInstances": 1,
           "maxInstances": 1,
-          "installCommand": "pnpm install --prod false",
+          "installCommand": "pnpm install --prod false --unsafe-perm",
           "buildCommand": "pnpm run build --filter=api",
           "postBuildCommand": "pnpm run migrate:deploy",
           "startCommand": "cd apps/api && pnpm start",
