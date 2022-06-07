@@ -2,8 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "baseUrl": "./src",
-    "rootDir": "./src"
+    "baseUrl": "./src"
   },
   "exclude": ["./dist", "./prisma"]
 }

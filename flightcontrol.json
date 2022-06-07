@@ -54,7 +54,7 @@
           "minInstances": 1,
           "maxInstances": 1,
           "installCommand": "pnpm install --prod false",
-          "buildCommand": "pnpm run build --filter=api",
+          "buildCommand": "pnpm run build --filter=engine",
           "postBuildCommand": "echo a",
           "startCommand": "cd apps/engine && pnpm start",
           "envVariables": {
