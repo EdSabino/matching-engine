@@ -57,6 +57,7 @@
           "buildCommand": "pnpm run build --filter=engine",
           "postBuildCommand": "echo a",
           "startCommand": "cd apps/engine && pnpm start",
+          "dependsOn": ["db-prod"],
           "envVariables": {
             "AMQP_URL": {
               "fromParameterStore": "fc.matching-engine.env.crypto-matching-engine.18gp1nkh.AMQP_URL"
