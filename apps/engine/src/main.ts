@@ -84,3 +84,4 @@ async function dryRun(prisma: PrismaClient, tenantId: number, market: string) {
 }
 
 bootstrap();
+app.listen(process.env.PORT, () => 'server running on port 3333');
