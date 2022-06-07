@@ -21,7 +21,6 @@
           "postBuildCommand": "pnpm run migrate:deploy",
           "startCommand": "cd apps/api && pnpm start",
           "domain": "api.anthill-engine.com",
-          "dependsOn": ["engine-prod"],
           "envVariables": {
             "PORT": "3000",
             "DATABASE_URL": {
