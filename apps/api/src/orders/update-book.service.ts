@@ -31,11 +31,10 @@ export class UpdateBookService {
     queue: 'book.update.queue',
   })
   public async call(msg: BookUpdateExchangeMessage): Promise<void> {
-    const client = this.getClient();
     const bid = this.processLevels(msg.bid);
     const ask = this.processLevels(msg.ask);
-    await client.set(`book.${msg.tenantId}.${msg.market}.bid`, JSON.stringify(bid));
-    await client.set(`book.${msg.tenantId}.${msg.market}.ask`, JSON.stringify(ask));
+    await this.cacheManager.set(`book.${msg.tenantId}.${msg.market}.bid`, JSON.stringify(bid));
+    await this.cacheManager.set(`book.${msg.tenantId}.${msg.market}.ask`, JSON.stringify(ask));
 
     const webhook = await this.prisma.webhook.findFirst({
       where: {
@@ -60,9 +59,5 @@ export class UpdateBookService {
       ]);
       return previousValue;
     }, []);
-  }
-
-  private getClient() {
-    return (this.cacheManager.store as any).getClient();
   }
 }
