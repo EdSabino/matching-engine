@@ -24,6 +24,7 @@ async function bootstrap() {
   const prisma = new PrismaClient();
   const tenants = await prisma.tenant.findMany();
   const connection = new Amqp.Connection(process.env.AMQP_URL);
+  await connection.completeConfiguration();
   const exchange = connection.declareExchange('newOrdersExchange');
   const postTradeExchange = connection.declareExchange('postTradeExchange', 'topic');
   const bookUpdateExchange = connection.declareExchange('bookUpdateExchange', 'topic');
