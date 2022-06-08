@@ -1,8 +1,7 @@
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { WebhookAction } from '@matching-engine/prisma';
 import { HttpService } from '@nestjs/axios';
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
-import { Cache } from 'cache-manager';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 interface PriceLevel {
@@ -21,8 +20,7 @@ interface BookUpdateExchangeMessage {
 export class UpdateBookService {
   constructor(
     private readonly prisma: PrismaService,
-    private httpService: HttpService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    private httpService: HttpService
   ) {}
 
   @RabbitSubscribe({
@@ -33,9 +31,38 @@ export class UpdateBookService {
   public async call(msg: BookUpdateExchangeMessage): Promise<void> {
     const bid = this.processLevels(msg.bid);
     const ask = this.processLevels(msg.ask);
-    await this.cacheManager.set(`book.${msg.tenantId}.${msg.market}.bid`, JSON.stringify(bid));
-    await this.cacheManager.set(`book.${msg.tenantId}.${msg.market}.ask`, JSON.stringify(ask));
-
+    
+    const r = await this.prisma.book.upsert({
+      create: {
+        tenantId: msg.tenantId,
+        market: msg.market,
+        book: JSON.stringify({
+          bid,
+          ask
+        }),
+        topAsk: ask[0]?.[0] || 0,
+        topBid: bid[0]?.[0] || 0,
+        lowAsk: ask[ask.length - 1]?.[0] || 0,
+        lowBid: ask[ask.length - 1]?.[0] || 0
+      },
+      update: {
+        book: JSON.stringify({
+          bid,
+          ask
+        }),
+        topAsk: ask[0]?.[0] || 0,
+        topBid: bid[0]?.[0] || 0,
+        lowAsk: ask[ask.length - 1]?.[0] || 0,
+        lowBid: ask[ask.length - 1]?.[0] || 0
+      },
+      where: {
+        tenantId_market: {
+          tenantId: msg.tenantId,
+          market: msg.market,
+        }
+      }
+    });
+    console.log(r)
     const webhook = await this.prisma.webhook.findFirst({
       where: {
         tenantId: msg.tenantId,

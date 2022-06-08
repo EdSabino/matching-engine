@@ -2,7 +2,6 @@ import { Body, Controller, Get, Param, Post, Query, Session, UseInterceptors } f
 import { Order, Tenant } from '@matching-engine/prisma';
 import { CreateLimitOrder, CreateMarketOrder, CreateOrderDto } from './dto/create-order.dto';
 import { OrdersService } from './orders.service';
-import { Books } from './dto/books.dto';
 import { TenantAuthInterceptor } from 'src/tenants/tenants-auth.interceptor';
 import { OrderFilter } from './dto/orders-filter.dto';
 import { ApiBody, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
@@ -42,7 +41,9 @@ export class OrdersController {
   }
 
   @Get('/books/:market')
-  async getBook(@Session() session: Tenant, @Param('market') market: string): Promise<Books> {
-    return this.ordersService.getBooks(session.id, market);
+  async getBook(@Session() session: Tenant, @Param('market') market: string): Promise<any> {
+    const a = (await this.ordersService.getBooks(session.id, market)).book;
+    console.log(a)
+    return JSON.parse(a);
   }
 }

@@ -1,16 +1,13 @@
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
-import { Order, Prisma } from '@matching-engine/prisma';
+import { Injectable } from '@nestjs/common';
+import { Book, Order, Prisma } from '@matching-engine/prisma';
 import { PrismaService } from '../prisma.service';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { Cache } from 'cache-manager';
-import { Books } from './dto/books.dto';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly amqpConnection: AmqpConnection,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    private readonly amqpConnection: AmqpConnection
   ) {}
 
   async create(order: Prisma.OrderUncheckedCreateInput) {
@@ -34,10 +31,14 @@ export class OrdersService {
     });
   }
 
-  async getBooks(tenantId: number, market: string): Promise<Books> {
-    return {
-      bid: await this.cacheManager.get(`book.${tenantId}.${market}.bid`),
-      ask: await this.cacheManager.get(`book.${tenantId}.${market}.ask`),
-    };
+  async getBooks(tenantId: number, market: string): Promise<Book> {
+    return this.prisma.book.findUnique({
+      where: {
+        tenantId_market: {
+          tenantId,
+          market
+        }
+      }
+    });
   }
 }

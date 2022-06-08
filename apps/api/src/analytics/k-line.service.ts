@@ -1,14 +1,12 @@
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { KLine, Trade } from '@matching-engine/prisma';
-import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
-import { Cache } from 'cache-manager';
+import { Trade } from '@matching-engine/prisma';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class KLineService {
   constructor(
-    private readonly prisma: PrismaService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
+    private readonly prisma: PrismaService
   ) {}
 
 
@@ -58,6 +56,7 @@ export class KLineService {
             }
           });
         } else {
+          console.log(highestValue, trade.price)
           await this.prisma.kLine.create({
             data: {
               openTime: new Date(trade.createdAt),
@@ -81,10 +80,16 @@ export class KLineService {
   }
   
   private async getHighestAndLowest(tenantId: number, market: string, trade: Partial<Trade>): Promise<number[]> {
-    const bids: Array<any> = await this.cacheManager.get(`book.${tenantId}.${market}.bid`);
-    const asks: Array<any> = await this.cacheManager.get(`book.${tenantId}.${market}.ask`);
-    const highestValue = asks?.[0]?.[0] || bids?.[bids.length - 1]?.[0] || trade.price;
-    const lowestValue = bids?.[0]?.[0] || asks?.[asks.length - 1]?.[0] || trade.price;
+    const book = await this.prisma.book.findUnique({
+      where: {
+        tenantId_market: {
+          tenantId,
+          market
+        }
+      }
+    });
+    const highestValue = book.topAsk || book.lowBid || trade.price;
+    const lowestValue = book.topBid || book.lowAsk || trade.price;
 
     return [highestValue, lowestValue];
   }

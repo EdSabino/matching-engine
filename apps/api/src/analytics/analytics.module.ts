@@ -1,8 +1,6 @@
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
-import { CacheModule, Module } from '@nestjs/common';
-import { RedisClientOptions } from 'redis';
+import { Module } from '@nestjs/common';
 import { KLineService } from './k-line.service';
-import * as redisStore from 'cache-manager-redis-store';
 import { PrismaService } from 'src/prisma.service';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
@@ -10,7 +8,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    CacheModule.register(),
     RabbitMQModule.forRootAsync(RabbitMQModule, {
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
