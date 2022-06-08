@@ -1,15 +1,26 @@
+import { AmqpConnection } from "@golevelup/nestjs-rabbitmq";
 import { Prisma, Tenant, Webhook } from "@matching-engine/prisma";
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 export class TenantsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly amqpConnection: AmqpConnection) {}
 
-  async create(tenant: Prisma.TenantCreateInput): Promise<Tenant> {
-    return this.prisma.tenant.create({
-      data: tenant
+  async create(tenantArgs: Prisma.TenantCreateInput): Promise<Tenant> {
+    const tenant = await this.prisma.tenant.create({
+      data: tenantArgs
     });
+
+    this.amqpConnection.publish(
+      'newTenantExchange',
+      `tenant.new`,
+      {
+        tenant
+      }
+    );
+
+    return tenant;
   }
 
   async addWebhook(webhookArgs: Prisma.WebhookUncheckedCreateInput): Promise<Webhook> {

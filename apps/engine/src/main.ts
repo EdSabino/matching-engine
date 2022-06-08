@@ -28,29 +28,65 @@ async function bootstrap() {
   const exchange = connection.declareExchange('newOrdersExchange');
   const postTradeExchange = connection.declareExchange('postTradeExchange', 'topic');
   const bookUpdateExchange = connection.declareExchange('bookUpdateExchange', 'topic');
+  const newTenantExchange = connection.declareExchange('newTenantExchange');
 
-  await Promise.all(tenants.map(async (tenant: Tenant) => {
-    const markets = tenant.availableMarkets.split(', ');
-    matchings[tenant.id] = new Matching(buildEngines(markets), postTradeExchange, bookUpdateExchange, tenant.id);
+  const queue = connection.declareQueue(`tenant.new`);
+  queue.bind(newTenantExchange, `tenant.new`);
+  queue.activateConsumer((message) => {
+    const messageParsed = JSON.parse(message.getContent());
+    try {
+      createMatchingEngineForTenant(
+        messageParsed['tenant'] as Tenant,
+        postTradeExchange,
+        bookUpdateExchange,
+        exchange,
+        connection,
+        prisma
+      )
+    } catch (e) {
+      console.log(e)
+    }
+    message.ack();
+  });
 
-    await Promise.all(markets.map(async (market: string) => {
-      const queue = connection.declareQueue(`matching.queue.${market}.${tenant.id}`);
-      
-      queue.bind(exchange, `matching.key.${market}.${tenant.id}`);
+  await Promise.all(tenants.map((tenant: Tenant) => createMatchingEngineForTenant(
+    tenant,
+    postTradeExchange,
+    bookUpdateExchange,
+    exchange,
+    connection,
+    prisma
+  )));
+}
 
-      dryRun(prisma, tenant.id, market);
-      console.log('ready for new orders')
-      queue.activateConsumer((message) => {
-        console.log('Message received: ' + message.getContent());
-        const messageParsed = JSON.parse(message.getContent());
-        try {
-          matchings[tenant.id][messageParsed.action].call(matchings[tenant.id], messageParsed);
-        } catch (e) {
-          console.log(e)
-        }
-        message.ack();
-      });
-    }));
+async function createMatchingEngineForTenant(
+  tenant: Tenant,
+  postTradeExchange: Amqp.Exchange,
+  bookUpdateExchange: Amqp.Exchange,
+  exchange: Amqp.Exchange,
+  connection: Amqp.Connection,
+  prisma: PrismaClient
+) {
+  const markets = tenant.availableMarkets.split(', ');
+  matchings[tenant.id] = new Matching(buildEngines(markets), postTradeExchange, bookUpdateExchange, tenant.id);
+
+  await Promise.all(markets.map(async (market: string) => {
+    const queue = connection.declareQueue(`matching.queue.${market}.${tenant.id}`);
+    
+    queue.bind(exchange, `matching.key.${market}.${tenant.id}`);
+
+    dryRun(prisma, tenant.id, market);
+    console.log('ready for new orders')
+    queue.activateConsumer((message) => {
+      console.log('Message received: ' + message.getContent());
+      const messageParsed = JSON.parse(message.getContent());
+      try {
+        matchings[tenant.id][messageParsed.action].call(matchings[tenant.id], messageParsed);
+      } catch (e) {
+        console.log(e)
+      }
+      message.ack();
+    });
   }));
 }
 
