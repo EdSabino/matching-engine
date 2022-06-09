@@ -41,12 +41,12 @@ export class Orderbook {
   }
 
   getLimitBook() {
-    const book = this.limitOrders.values.slice(0, 501);
+    const book = this.limitOrders.values;
     if (this.side === OrderSide.BID) {
       book.reverse();
     }
 
-    return book;
+    return book.slice(0, 501);
   }
 
   top(): Order {
