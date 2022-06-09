@@ -4,7 +4,9 @@ import { CreateLimitOrder, CreateMarketOrder, CreateOrderDto } from './dto/creat
 import { OrdersService } from './orders.service';
 import { TenantAuthInterceptor } from 'src/tenants/tenants-auth.interceptor';
 import { OrderFilter } from './dto/orders-filter.dto';
-import { ApiBody, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
+import { ApiBody, ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
+import { OrderDto } from './dto/order.dto';
+import { Books } from './dto/books.dto';
 
 @Controller('orders')
 @UseInterceptors(TenantAuthInterceptor)
@@ -13,6 +15,13 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
+  @ApiResponse({
+    status: 200,
+    type: OrderDto
+  })
+  @ApiResponse({
+    status: 403,
+  })
   @ApiBody({
     schema: {
       oneOf: [
@@ -30,6 +39,13 @@ export class OrdersController {
   }
 
   @Get()
+  @ApiResponse({
+    status: 200,
+    type: OrderDto
+  })
+  @ApiResponse({
+    status: 403,
+  })
   async getOrders(@Session() session: Tenant, @Query() query: OrderFilter): Promise<Order[]> {
     return this.ordersService.getOrders({
       ...query,
@@ -41,9 +57,14 @@ export class OrdersController {
   }
 
   @Get('/books/:market')
-  async getBook(@Session() session: Tenant, @Param('market') market: string): Promise<any> {
-    const a = (await this.ordersService.getBooks(session.id, market)).book;
-    console.log(a)
-    return JSON.parse(a);
+  @ApiResponse({
+    status: 200,
+    type: Books
+  })
+  @ApiResponse({
+    status: 403,
+  })
+  async getBook(@Session() session: Tenant, @Param('market') market: string): Promise<Books> {
+    return JSON.parse((await this.ordersService.getBooks(session.id, market)).book);
   }
 }

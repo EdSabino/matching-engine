@@ -38,6 +38,12 @@ export class CreateLimitOrder {
     required: true
   })
   price: number;
+
+  @ApiProperty({
+    description: 'Client side ID',
+    required: true
+  })
+  externalId: number;
 }
 
 export class CreateMarketOrder extends OmitType(CreateLimitOrder, ['price']) {}
