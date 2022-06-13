@@ -37,6 +37,28 @@ async function bootstrap() {
     try {
       createMatchingEngineForTenant(
         messageParsed['tenant'] as Tenant,
+        messageParsed['tenant'].availableMarkets.split(', '),
+        postTradeExchange,
+        bookUpdateExchange,
+        exchange,
+        connection,
+        prisma
+      )
+    } catch (e) {
+      console.log(e)
+    }
+    message.ack();
+  });
+
+  const newEngineQueue = connection.declareQueue(`tenant.engine.new`);
+  newEngineQueue.bind(newTenantExchange, `tenant.engine.new`);
+  newEngineQueue.activateConsumer((message) => {
+    const messageParsed = JSON.parse(message.getContent());
+    console.log(messageParsed)
+    try {
+      createMatchingEngineForTenant(
+        messageParsed['tenant'] as Tenant,
+        messageParsed['newMarkets'].split(', '),
         postTradeExchange,
         bookUpdateExchange,
         exchange,
@@ -51,6 +73,7 @@ async function bootstrap() {
 
   await Promise.all(tenants.map((tenant: Tenant) => createMatchingEngineForTenant(
     tenant,
+    tenant.availableMarkets.split(', '),
     postTradeExchange,
     bookUpdateExchange,
     exchange,
@@ -61,13 +84,13 @@ async function bootstrap() {
 
 async function createMatchingEngineForTenant(
   tenant: Tenant,
+  markets: string[],
   postTradeExchange: Amqp.Exchange,
   bookUpdateExchange: Amqp.Exchange,
   exchange: Amqp.Exchange,
   connection: Amqp.Connection,
   prisma: PrismaClient
 ) {
-  const markets = tenant.availableMarkets.split(', ');
   matchings[tenant.id] = new Matching(buildEngines(markets), postTradeExchange, bookUpdateExchange, tenant.id);
 
   await Promise.all(markets.map(async (market: string) => {

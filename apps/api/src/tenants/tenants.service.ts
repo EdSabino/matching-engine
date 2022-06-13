@@ -23,6 +23,28 @@ export class TenantsService {
     return tenant;
   }
 
+  async createEngines(tenant: Tenant, newMarkets: string): Promise<Tenant> {
+    const updatedTenant = await this.prisma.tenant.update({
+      data: {
+        availableMarkets: `${tenant.availableMarkets}, ${newMarkets}`
+      },
+      where: {
+        id: tenant.id
+      }
+    });
+
+    this.amqpConnection.publish(
+      'newTenantExchange',
+      `tenant.engine.new`,
+      {
+        tenant: updatedTenant,
+        newMarkets
+      }
+    );
+
+    return updatedTenant;
+  }
+
   async addWebhook(webhookArgs: Prisma.WebhookUncheckedCreateInput): Promise<Webhook> {
     const webhook = await this.prisma.webhook.findFirst({
       where: {

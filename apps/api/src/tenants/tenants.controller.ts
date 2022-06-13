@@ -1,6 +1,7 @@
 import { Tenant, Webhook } from '@matching-engine/prisma';
-import { Body, Controller, Post, Session, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Post, Put, Session, UseInterceptors } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
+import { AddEngineDto } from './dto/add-engine.dto';
 import { AddWebhookDto } from './dto/add-webhook.dto';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { TenantDto } from './dto/tenant.dto';
@@ -23,6 +24,19 @@ export class TenantsController {
   })
   async create(@Body() createTenantDto: CreateTenantDto): Promise<Tenant> {
     return this.tenantsService.create(createTenantDto);
+  }
+
+  @Put('engine')
+  @ApiResponse({
+    status: 200,
+    type: TenantDto
+  })
+  @ApiResponse({
+    status: 403,
+  })
+  @UseInterceptors(TenantAuthInterceptor)
+  async createEngine(@Body() addEngineDto: AddEngineDto, @Session() session: Tenant): Promise<Tenant> {
+    return this.tenantsService.createEngines(session, addEngineDto.newMarkets);
   }
 
   @Post('webhook')
