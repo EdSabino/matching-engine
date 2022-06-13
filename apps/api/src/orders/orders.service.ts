@@ -25,6 +25,26 @@ export class OrdersService {
     return createdOrder;
   }
 
+  async cancelOrderById(orderId: number, tenantId: number): Promise<Order> {
+    const order = await this.prisma.order.findFirst({
+      where: {
+        id: orderId,
+        tenantId: tenantId
+      }
+    });
+
+    this.amqpConnection.publish(
+      'newOrdersExchange',
+      `matching.key.${order.market}.${order.tenantId}`,
+      {
+        action: 'cancel',
+        order: order
+      }
+    );
+
+    return order;
+  }
+
   async getOrders(filter: Prisma.OrderWhereInput): Promise<Order[]> {
     return this.prisma.order.findMany({
       where: filter

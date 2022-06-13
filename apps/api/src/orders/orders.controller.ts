@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Session, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, Session, UseInterceptors } from '@nestjs/common';
 import { Order, Tenant } from '@matching-engine/prisma';
 import { CreateLimitOrder, CreateMarketOrder, CreateOrderDto } from './dto/create-order.dto';
 import { OrdersService } from './orders.service';
@@ -36,6 +36,18 @@ export class OrdersController {
       tenantId: session.id,
       ...createOrderDto
     });
+  }
+
+  @Put('/cancel/:id')
+  @ApiResponse({
+    status: 200,
+    type: OrderDto
+  })
+  @ApiResponse({
+    status: 403,
+  })
+  async cancel(@Session() session: Tenant, @Param('id') id: string): Promise<Order> {
+    return this.ordersService.cancelOrderById(parseInt(id), session.id);
   }
 
   @Get()
